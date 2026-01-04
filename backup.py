@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 from togglapi import api
 
-from config import API_TOKEN, TIMEZONE
+# from config import API_TOKEN, TIMEZONE
 
 START_MONTH = '2015-03'
 

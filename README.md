@@ -1,120 +1,238 @@
-Toggl Target
-============
+# Toggl Target v2.0
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/6cc811c7d497451486079451ec0fbeb6)](https://app.codacy.com/app/mosab-a-ibrahim/toggl_target?utm_source=github.com&utm_medium=referral&utm_content=mos3abof/toggl_target&utm_campaign=badger)
+[![CI/CD](https://github.com/mos3abof/toggl_target/workflows/CI/badge.svg)](https://github.com/mos3abof/toggl_target/actions)
+[![codecov](https://codecov.io/gh/mos3abof/toggl_target/branch/main/graph/badge.svg)](https://codecov.io/gh/mos3abof/toggl_target)
+[![PyPI version](https://badge.fury.io/py/toggl-target.svg)](https://badge.fury.io/py/toggl-target)
 
-At work, we track our working hours on Toggl (www.toggl.com), so I created this small project to calculate how many hours I should work to achieve my monthly goals.
+A modern Python library and CLI for calculating work hour targets from Toggl time tracking data.
 
-You will need to install `requests` and `dateutil` python libraries to be able to use this.
+## Features
 
+- 🚀 **Modern Python 3.8+** with type hints and dataclasses
+- 🎯 **Accurate calculations** for monthly targets and daily requirements
+- 🛠 **Rich CLI interface** with beautiful terminal output
+- ⚙️ **Flexible configuration** via YAML files or environment variables
+- 📊 **Multiple output formats** (terminal, JSON, YAML)
+- 🧪 **Comprehensive testing** with pytest
+- 📦 **Easy installation** with UV/pip
 
-Installation on linux
----------------------
+## Installation
 
-If you are using linux, you most probably have Python already installed on your machine.
-If not, use your distro's package management system to install Python 2.7
+### Using UV (Recommended)
 
-* Download and extract the source code from [here](https://github.com/mos3abof/toggl_target/archive/master.zip)
-* Navigate to the extracted directory and run the following command to install the required packages :
+```bash
+# Install UV if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-```
-$ pip install -r requirements.txt
-```
-
-* Copy `config.py-example` to `config.py`
-* In `config.py` add your Toggl API token, which can be found in your Toggl account's settings.
-* Change other values in `config.py` to match your case
-
-Installation on Windows
------------------------
-
-* If you don't have Python installed, then you must install Python 2.7 from [here](http://python.org/ftp/python/2.7.5/python-2.7.5.msi)
-* Open the Windows command shell
-* In the command shell, run the following commands
-
-```
-python distribute_setup.py
-easy_install pip
-pip install python-dateutil requests
+# Install toggl-target
+uv add toggl-target
 ```
 
-* Download toggl_target from [here](https://github.com/mos3abof/toggl_target/archive/master.zip)
-* Extract the downloaded zip file, copy `config.py-example` & paste it as `config.py` beside `run.py`
-* Change your API key in `config.py` Your Toggl  API token can be found in your Toggl account's settings.
-* Run `python run.py`
+### Using pip
 
-Usage
------
-
-To use the script run the following command :
-
-```
-$ python run.py
+```bash
+pip install toggl-target
 ```
 
-The output will be something like :
+## Quick Start
 
-```
-Hi
-Checking Internet connectivity...
-Internet seems fine!
+### 1. Initialize Configuration
 
-Trying to connect to Toggl, hang on!
+```bash
+# Create a default configuration file
+toggl-target init
 
-So far you have tracked 120.00 hours
-
-Business days left till deadline : 7
-Total days left till deadline : 10
-
-Required working hours for this month : 170
-
-To achieve the minimum :
-    you should log 4.00 hours every business day
-    or log 3.00 hours every day
-
-To achieve the required :
-    you should log 7.00 hours every business day
-    or log 5.0 hours every day
-
-So far you have achieved:
-
-70.59% [=================================================--------------|------]
+# Or specify a custom path
+toggl-target init my-config.yaml
 ```
 
-Contributores
--------------
+### 2. Configure Your API Token
 
-* [@mos3abof](http://www.mos3abof.com)
-* [@mtayseer](http://www.mtayseer.net)
+Edit the generated `toggl-target.yaml` file:
 
+```yaml
+api:
+  api_token: "YOUR_TOGGL_API_TOKEN_HERE"  # Get from https://track.toggl.com/profile
+  timezone: "+00:00"
 
-Support or Contact
-------------------
-If you have trouble using this code, your can contact toggl@mos3abof.com and I’ll help you sort it out if I have enough time :).
-
-
-
-Bug Reports & Feature Requests
-------------------------------
-
-To report bugs, issues or feature requests please use the Issues Queue on this Github repository to make it easier for me to maintain. Please don't send those to my email.
-
-
-
-License
--------
-
+working_time:
+  working_hours_per_day: 8.0
+  business_days: [MON, TUE, WED, THU, FRI]
+  tolerance_percentage: 0.1
 ```
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or
-(at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+### 3. Check Your Status
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+```bash
+# Show current progress
+toggl-target status
+
+# Get detailed report in JSON format
+toggl-target report --format json
+
+# Get detailed report in YAML format  
+toggl-target report --format yaml
 ```
+
+### 4. Use as a Library
+
+```python
+from toggl_target import TogglAPI, TargetCalculator, ConfigManager
+
+# Load configuration
+config_manager = ConfigManager()
+working_config, api_config = config_manager.load_config()
+
+# Initialize API and calculator
+api = TogglAPI(api_config)
+calculator = TargetCalculator(working_config)
+
+# Get current progress
+achieved_hours = api.get_hours_tracked(
+    start_date=calculator.month_start,
+    end_date=calculator.now
+)
+
+target, min_hours, req_hours = calculator.get_daily_targets(achieved_hours)
+print(f"Achieved: {target.achieved_hours:.2f}h")
+print(f"Progress: {target.achieved_percentage*100:.1f}%")
+```
+
+## Configuration
+
+### Configuration File Locations
+
+Toggl Target looks for configuration files in this order:
+
+1. `toggl-target.yaml` (current directory)
+2. `toggl-target.yml` (current directory)  
+3. `.toggl-target.yaml` (current directory)
+4. `~/.config/toggl-target/config.yaml`
+5. `~/.toggl-target.yaml`
+
+### Environment Variables
+
+You can override configuration with environment variables:
+
+```bash
+export TOGGL_API_TOKEN="your_token_here"
+export TOGGL_TIMEZONE="+02:00"
+export WORKING_HOURS_PER_DAY="7.5"
+export TOLERANCE_PERCENTAGE="0.15"
+export BUSINESS_DAYS="MON,TUE,WED,THU,FRI"
+```
+
+## CLI Commands
+
+### `status`
+Show current progress and daily targets.
+
+```bash
+toggl-target status [--config PATH] [--verbose]
+```
+
+### `report`  
+Generate detailed reports.
+
+```bash
+toggl-target report [--format table|json|yaml] [--config PATH] [--verbose]
+```
+
+### `init`
+Initialize configuration file.
+
+```bash
+toggl-target init [PATH] [--force]
+```
+
+### `version`
+Show version information.
+
+```bash
+toggl-target version
+```
+
+## Development
+
+### Setup Development Environment
+
+```bash
+# Clone the repository
+git clone https://github.com/mos3abof/toggl_target.git
+cd toggl_target
+
+# Create virtual environment with UV
+uv venv
+source .venv/bin/activate  # On Windows: .venv\\Scripts\\activate
+
+# Install in development mode
+uv pip install -e ".[dev]"
+
+# Install pre-commit hooks
+pre-commit install
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+uv run pytest
+
+# Run with coverage
+uv run pytest --cov=src/toggl_target --cov-report=html
+
+# Run specific test file
+uv run pytest tests/test_models.py
+```
+
+### Code Quality
+
+```bash
+# Format code
+uv run black src/ tests/
+
+# Lint code
+uv run ruff check src/ tests/
+
+# Type checking
+uv run mypy src/
+```
+
+## Migration from v1.x
+
+If you're migrating from the old Python 2.7 version:
+
+1. **Configuration**: The old `config.py` file is no longer used. Use `toggl-target init` to create a modern YAML config.
+
+2. **Python Version**: Requires Python 3.8+ (was Python 2.7)
+
+3. **Installation**: Use UV or pip (was manual requirements.txt)
+
+4. **CLI**: New commands and options. Run `toggl-target --help` to see all options.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the GPL-2.0 License - see the [LICENSE.txt](LICENSE.txt) file for details.
+
+## Support
+
+If you have trouble using this code:
+
+- 📧 Email: toggl@mos3abof.com
+- 🐛 Issues: [GitHub Issues](https://github.com/mos3abof/toggl_target/issues)
+- 📖 Documentation: [Wiki](https://github.com/mos3abof/toggl_target/wiki)
+
+## Acknowledgments
+
+- Thanks to all [contributors](https://github.com/mos3abof/toggl_target/graphs/contributors) who have helped improve this project.
+- Built with ❤️ using modern Python tools: UV, Pydantic, Click, Rich, and pytest.

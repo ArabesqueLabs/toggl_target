@@ -1,0 +1,19 @@
+# Toggl Target Configuration File
+# Copy this file to toggl-target.yaml and customize for your needs
+
+# API configuration
+api:
+  api_token: "YOUR_TOGGL_API_TOKEN_HERE"  # Get from https://track.toggl.com/profile
+  timezone: "+00:00"                      # Your timezone
+  timeout: 30                             # Request timeout in seconds
+
+# Working time configuration
+working_time:
+  working_hours_per_day: 8.0              # Hours to work per business day
+  business_days:                          # Business days of the week
+    - MON                                # Monday
+    - TUE                                # Tuesday  
+    - WED                                # Wednesday
+    - THU                                # Thursday
+    - FRI                                # Friday
+  tolerance_percentage: 0.1               # 10% tolerance for minimum target

@@ -133,4 +133,10 @@ def main():
 
 
 if __name__ == '__main__':
+    """Testing out magit"""
     main()
+
+    if __name__ == '__main__':
+        print("Hello, world")
+        x = 5 * 2
+        sys.exit()
